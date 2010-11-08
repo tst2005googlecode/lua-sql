@@ -52,7 +52,7 @@ LUASQL_API int luasql_createmeta (lua_State *L, const char *name, const luaL_reg
 
 	/* define metamethods */
 	lua_pushliteral (L, "__index");
-	lua_pushvalue (L, -2); 
+	lua_pushvalue (L, -2);
 	lua_settable (L, -3);
 
 	lua_pushliteral (L, "__tostring");
@@ -98,15 +98,15 @@ LUASQL_API void luasql_set_info (lua_State *L) {
 */
 LUASQL_API char* luasql_getfetchmodestring( lua_State *L, const char *msdefault ) {
 	char* opts = msdefault;
-	
+
 	/* verify if the second parameter is a table */
   	if( lua_istable( L, 3 ) ) {
   		lua_pushstring( L, LUASQL_MODESTRING );
   		lua_gettable( L, 3 );
-  		
+
   		if( lua_isstring( L, -1 ) )
   			opts = lua_tostring( L, -1 );
-  		
+
   		lua_pop( L, 1 );
   	} else {
   		if( lua_isstring( L, 3 ) )

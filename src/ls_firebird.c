@@ -282,7 +282,7 @@ static int count_rows_affected(cur_data* cur)
 **   row count: number of rows affected by statement if no results
 */
 static int conn_execute (lua_State *L) {
-	conn_data *conn = getconnection(L,1);
+	conn_data *conn = getconnection(L, 1);
 	const char *statement = luaL_checkstring(L, 2);
 	int dialect = (int)luaL_optnumber(L, 3, 3);
 
@@ -367,7 +367,7 @@ static int conn_execute (lua_State *L) {
 			break;
 		case SQL_SHORT:
 			var->sqldata = (char *)malloc(sizeof(short));
-			break;			
+			break;
 		case SQL_LONG:
 			var->sqldata = (char *)malloc(sizeof(long));
 			break;
@@ -458,7 +458,7 @@ static int conn_execute (lua_State *L) {
 ** Commits the current transaction
 */
 static int conn_commit(lua_State *L) {
-	conn_data *conn = getconnection(L,1);
+	conn_data *conn = getconnection(L, 1);
 
 	/* closed? */
 	if(conn->closed != 0) {
@@ -482,7 +482,7 @@ static int conn_commit(lua_State *L) {
 **   nil and error message otherwise.
 */
 static int conn_rollback(lua_State *L) {
-	conn_data *conn = getconnection(L,1);
+	conn_data *conn = getconnection(L, 1);
 
 	/* closed? */
 	if(conn->closed != 0) {
@@ -513,7 +513,7 @@ static void conn_dosetautocommit(lua_State *L, conn_data *conn, int pos){
 }
 
 static int conn_setautocommit(lua_State *L) {
-	conn_data *conn = getconnection(L,1);
+	conn_data *conn = getconnection(L, 1);
 
 	/* closed? */
 	if(conn->closed != 0) {
@@ -630,7 +630,7 @@ static int conn_escape(lua_State *L) {
  */
 static void conn_set(lua_State *L) {
 	if( lua_istable( L, 2 ) ) {
-		conn_data *conn = getconnection(L);
+		conn_data *conn = getconnection(L, 1);
 		char *key;
 		lua_pushnil(L);
 
@@ -645,7 +645,7 @@ static void conn_set(lua_State *L) {
 			}
 
 			lua_pop(L, 1);
-		}		
+		}
 	}
 }
 
@@ -658,7 +658,7 @@ static int conn_get( lua_State *L ) {
 
 	if( lua_istable( L, 2 ) ) {
 		int rsp = lua_gettop(L);
-		conn_data *conn = getconnection(L);
+		conn_data *conn = getconnection(L, 1);
 		char *key;
 		lua_pushnil(L);
 
@@ -674,17 +674,17 @@ static int conn_get( lua_State *L ) {
 			}
 
 			lua_pop(L, 1);
-		}		
+		}
 	} else
 		if( lua_isstring( L, 2 ) ) {
 			const char *key = lua_tostring(L, 2);
 
 			if( strcmp(key, LUASQL_AUTOCOMMIT) == 0 ) {
-				conn_data *conn = getconnection(L);
+				conn_data *conn = getconnection(L, 1);
 				lua_pushboolean( L, conn->auto_commit );
 			} else
 				lua_pushnil(L);
-		} else 
+		} else
 			lua_pushnil(L);
 
 	return 1;
@@ -791,7 +791,7 @@ static void push_column(lua_State *L, int i, cur_data *cur) {
 static int cur_fetch (lua_State *L) {
 	ISC_STATUS fetch_stat;
 	int i;
-	cur_data *cur = getcursor(L,1);
+	cur_data *cur = getcursor(L, 1);
     const char *opts = luasql_getfetchmodestring( L, cur->modestring );
 	int num = strchr(opts, 'n') != NULL;
 	int alpha = strchr(opts, 'a') != NULL;
@@ -869,7 +869,7 @@ static int cur_fetch (lua_State *L) {
 static int cur_colnames (lua_State *L) {
 	int i;
 	XSQLVAR *var;
-	cur_data *cur = getcursor(L,1);
+	cur_data *cur = getcursor(L, 1);
 
 	/* closed? */
 	if(cur->closed != 0) {
@@ -898,7 +898,7 @@ static int cur_colnames (lua_State *L) {
 static int cur_coltypes (lua_State *L) {
 	int i;
 	XSQLVAR *var;
-	cur_data *cur = getcursor(L,1);
+	cur_data *cur = getcursor(L, 1);
 
 	/* closed? */
 	if(cur->closed != 0) {
@@ -998,11 +998,19 @@ static int cur_gc (lua_State *L) {
 }
 
 /*
+** Push the number of rows.
+*/
+static int cur_numrows (lua_State *L) {
+	lua_pushnumber (L, count_rows_affected( getcursor(L, 1) ) );
+	return 1;
+}
+
+/*
  * Sets the cursor parameters
  */
 static void cur_set(lua_State *L) {
 	if( lua_istable( L, 2 ) ) {
-		cur_data *cur = getcursor(L);
+		cur_data *cur = getcursor(L, 1);
 		char *key;
 		lua_pushnil(L);
 
@@ -1017,7 +1025,7 @@ static void cur_set(lua_State *L) {
 			}
 
 			lua_pop(L, 1);
-		}		
+		}
 	}
 }
 
@@ -1029,7 +1037,7 @@ static int cur_get( lua_State *L ) {
 	if( lua_istable( L, 2 ) ) {
 		lua_newtable(L);
 		int rsp = lua_gettop(L);
-		cur_data *cur = getcursor(L);
+		cur_data *cur = getcursor(L, 1);
 		char *key;
 		lua_pushnil(L);
 
@@ -1051,11 +1059,11 @@ static int cur_get( lua_State *L ) {
 			const char *key = lua_tostring(L, 2);
 
 			if( strcmp(key, LUASQL_MODESTRING) == 0 ) {
-				cur_data *cur = getcursor(L);
+				cur_data *cur = getcursor(L, 1);
 				lua_pushstring( L, cur->modestring );
 			} else
 				lua_pushnil(L);
-		} else 
+		} else
 			lua_pushnil(L);
 
 	return 1;
@@ -1098,7 +1106,7 @@ static int env_connect (lua_State *L) {
 	conn_data* res_conn;
 
 	env_data *env = (env_data *) getenvironment (L, 1);
-	
+
 	char *sourcename;
 	char *username;
 	char *password;
@@ -1106,21 +1114,21 @@ static int env_connect (lua_State *L) {
 	if( lua_istable( L, 2 ) ) {
 		lua_pushstring( L, LUASQL_SOURCENAME );
 		lua_gettable( L, 2 );
-		
+
 		if( lua_isstring( L, -1 ) )
 			sourcename = lua_tostring( L, -1 );
 
 		lua_pop( L, 1 );
 		lua_pushstring( L, LUASQL_USERNAME );
 		lua_gettable( L, 2 );
-		
+
 		if( lua_isstring( L, -1 ) )
 			username = lua_tostring( L, -1 );
 
 		lua_pop( L, 1 );
 		lua_pushstring( L, LUASQL_PASSWORD );
 		lua_gettable( L, 2 );
-		
+
 		if( lua_isstring( L, -1 ) )
 			password = lua_tostring( L, -1 );
 
@@ -1202,7 +1210,7 @@ static int env_connect (lua_State *L) {
 static int env_close (lua_State *L) {
 	env_data *env = (env_data *)luaL_checkudata (L, 1, LUASQL_ENVIRONMENT_FIREBIRD);
 	luaL_argcheck (L, env != NULL, 1, "environment expected");
-	
+
 	/* already closed? */
 	if(env->closed == 1) {
 		lua_pushboolean(L, 0);
@@ -1239,7 +1247,7 @@ static int env_gc (lua_State *L) {
  */
 static void env_set(lua_State *L) {
 	if( lua_istable( L, 2 ) ) {
-		env_data *env = getenvironment(L);
+		env_data *env = getenvironment(L, 1);
 		char *key;
 		lua_pushnil(L);
 
@@ -1254,7 +1262,7 @@ static void env_set(lua_State *L) {
 			}
 
 			lua_pop(L, 1);
-		}		
+		}
 	}
 }
 
@@ -1266,7 +1274,7 @@ static int env_get(lua_State *L) {
 
 	if( lua_istable( L, 2 ) ) {
 		int rsp = lua_gettop(L);
-		env_data *env = getenvironment(L);
+		env_data *env = getenvironment(L, 1);
 		char *key;
 		lua_pushnil(L);
 
@@ -1282,17 +1290,17 @@ static int env_get(lua_State *L) {
 			}
 
 			lua_pop(L, 1);
-		}		
+		}
 	} else
 		if( lua_isstring( L, 2 ) ) {
 			const char *key = lua_tostring(L, 2);
 /*
 			if( strcmp(key, LUASQL_LOCKTIMEOUT) == 0 ) {
-				env_data *env = getenvironment(L);
+				env_data *env = getenvironment(L, 1);
 				lua_pushinteger( L, env->locktimeout );
 			} else  */
 				lua_pushnil(L);
-		} else 
+		} else
 			lua_pushnil(L);
 
 	return 1;
@@ -1329,6 +1337,7 @@ static void create_metatables (lua_State *L) {
 		{"fetch", cur_fetch},
 		{"getcoltypes", cur_coltypes},
 		{"getcolnames", cur_colnames},
+		{"numrows",     cur_numrows},
 	    {"get", cur_get},
 	    {"set", cur_set},
 		{NULL, NULL},
@@ -1353,4 +1362,4 @@ LUASQL_API int luaopen_luasql_firebird (lua_State *L) {
 	luaL_openlib (L, LUASQL_TABLENAME, driver, 0);
 	luasql_set_info (L);
 	return 1;
-} 
+}

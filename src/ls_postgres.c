@@ -316,7 +316,7 @@ static void cur_set(lua_State *L) {
 			}
 
 			lua_pop(L, 1);
-		}		
+		}
 	}
 }
 
@@ -354,7 +354,7 @@ static int cur_get( lua_State *L ) {
 				lua_pushstring( L, cur->modestring );
 			} else
 				lua_pushnil(L);
-		} else 
+		} else
 			lua_pushnil(L);
 
 	return 1;
@@ -389,7 +389,7 @@ static void sql_commit(conn_data *conn) {
 
 
 static void sql_begin(conn_data *conn) {
-	PQclear(PQexec(conn->pg_conn, "BEGIN")); 
+	PQclear(PQexec(conn->pg_conn, "BEGIN"));
 }
 
 
@@ -484,7 +484,7 @@ static int conn_commit (lua_State *L) {
 	conn_data *conn = getconnection (L);
 	sql_commit(conn);
 	if (conn->auto_commit == 0) {
-		sql_begin(conn); 
+		sql_begin(conn);
 		lua_pushboolean (L, 1);
 	} else
 		lua_pushboolean (L, 0);
@@ -499,7 +499,7 @@ static int conn_rollback (lua_State *L) {
 	conn_data *conn = getconnection (L);
 	sql_rollback(conn);
 	if (conn->auto_commit == 0) {
-		sql_begin(conn); 
+		sql_begin(conn);
 		lua_pushboolean (L, 1);
 	} else
 		lua_pushboolean (L, 0);
@@ -551,7 +551,7 @@ static void conn_set(lua_State *L) {
 			}
 
 			lua_pop(L, 1);
-		}		
+		}
 	}
 }
 
@@ -580,7 +580,7 @@ static int conn_get( lua_State *L ) {
 			}
 
 			lua_pop(L, 1);
-		}		
+		}
 	} else
 		if( lua_isstring( L, 2 ) ) {
 			const char *key = lua_tostring(L, 2);
@@ -590,7 +590,7 @@ static int conn_get( lua_State *L ) {
 				lua_pushboolean( L, conn->auto_commit );
 			} else
 				lua_pushnil(L);
-		} else 
+		} else
 			lua_pushnil(L);
 
 	return 1;
@@ -641,41 +641,41 @@ static int env_connect (lua_State *L) {
 	if( lua_istable( L, 2 ) ) {
 		lua_pushstring( L, LUASQL_SOURCENAME );
 		lua_gettable( L, 2 );
-		
+
 		if( lua_isstring( L, -1 ) )
 			sourcename = lua_tostring( L, -1 );
 
-		lua_pop( L, 1 );		
+		lua_pop( L, 1 );
 
 		if( strchr(sourcename, '=') != NULL )
 			conn = PQconnectdb (sourcename);
 		else {
 			lua_pushstring( L, LUASQL_USERNAME );
 			lua_gettable( L, 2 );
-			
+
 			if( lua_isstring( L, -1 ) )
 				username = lua_tostring( L, -1 );
 
 			lua_pop( L, 1 );
 			lua_pushstring( L, LUASQL_PASSWORD );
 			lua_gettable( L, 2 );
-			
+
 			if( lua_isstring( L, -1 ) )
 				password = lua_tostring( L, -1 );
 
 			lua_pop( L, 1 );
 			lua_pushstring( L, LUASQL_HOSTNAME );
 			lua_gettable( L, 2 );
-			
+
 			if( lua_isstring( L, -1 ) )
-				host = lua_tostring( L, -1 );
+				pghost = lua_tostring( L, -1 );
 
 			lua_pop( L, 1 );
 			lua_pushstring( L, LUASQL_PORT );
 			lua_gettable( L, 2 );
-			
+
 			if( lua_isnumber( L, -1 ) )
-				port = lua_tointeger( L, -1 );
+				pgport = lua_tointeger( L, -1 );
 
 			lua_pop( L, 1 );
 			conn = PQsetdbLogin(pghost, pgport, NULL, NULL,
@@ -754,7 +754,7 @@ static void env_set(lua_State *L) {
 			}
 
 			lua_pop(L, 1);
-		}		
+		}
 	}
 }
 
@@ -782,7 +782,7 @@ static int env_get(lua_State *L) {
 			}
 
 			lua_pop(L, 1);
-		}		
+		}
 	} else
 		if( lua_isstring( L, 2 ) ) {
 			const char *key = lua_tostring(L, 2);
@@ -792,7 +792,7 @@ static int env_get(lua_State *L) {
 				lua_pushinteger( L, env->locktimeout );
 			} else */
 				lua_pushnil(L);
-		} else 
+		} else
 			lua_pushnil(L);
 
 	return 1;
