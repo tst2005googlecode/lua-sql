@@ -6,8 +6,8 @@
 #T= odbc
 #T= postgres
 #T= sqlite
-#T=sqlite3
-T=firebird
+#T= sqlite3
+T= firebird
 
 # Installation directories
 
