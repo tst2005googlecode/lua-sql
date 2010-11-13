@@ -1001,7 +1001,16 @@ static int cur_gc (lua_State *L) {
 ** Push the number of rows.
 */
 static int cur_numrows (lua_State *L) {
-	lua_pushnumber (L, count_rows_affected( getcursor(L, 1) ) );
+	cur_data *cur = getcursor(L, 1);
+
+	/* closed? */
+	if(cur->closed != 0) {
+		lua_pushnil(L);
+		lua_pushstring(L, "cursor is closed");
+		return 2;
+	}
+
+	lua_pushnumber (L, count_rows_affected( cur ) );
 	return 1;
 }
 
